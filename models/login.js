@@ -1,29 +1,30 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
+const pool = require('../db/db');
+
+// Get all users from the database
+async function getLogins() {
+    try {
+        const [users] = await pool.query("SELECT * FROM users");
+        return users;
+    } catch (error) {
+        console.error(error.stack);
+        throw new Error('Error fetching users from the database.');
+    }
+}
+
+// Get a specific user by ID from the database
+async function getLogin(id) {
+    try {
+        const [user] = await pool.query(`
+        SELECT *
+        FROM users
+        WHERE id = ?`, [id]);
+        return user[0];
+    } catch (error) {
+        console.error(error.stack);
+        throw new Error('Error fetching user from the database.');
+    }
+}
 
 
-const loginSchema = new mongoose.Schema({
-
-    email: {
-        type: String,
-        required: true,
-        unique: [true, "Email id already present"],
-        validate(value) {
-            if (!validator.isEmail(value)) {
-                throw new Error("Invalid Email")
-            }
-        }
-    },
-
-    password: {
-        type: String,
-        required: true,
-        unique: true
-    },
-
-})
-
-
-const Login = mongoose.model('Login', loginSchema);
-
-module.exports = Login;
+module.exports = getLogin;
+module.exports = getLogins;
