@@ -1,7 +1,8 @@
-const pool = require('../db/db');
+// api/models/login.js
+import pool from '../db/db.js';
 
 // Get all users from the database
-async function getLogins() {
+export async function getAllUsers() {
     try {
         const [users] = await pool.query("SELECT * FROM users");
         return users;
@@ -12,7 +13,7 @@ async function getLogins() {
 }
 
 // Get a specific user by ID from the database
-async function getLogin(id) {
+export async function getOneUser(id) {
     try {
         const [user] = await pool.query(`
         SELECT *
@@ -24,7 +25,3 @@ async function getLogin(id) {
         throw new Error('Error fetching user from the database.');
     }
 }
-
-
-module.exports = getLogin;
-module.exports = getLogins;

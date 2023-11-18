@@ -1,33 +1,36 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const { createUser, editUser, deleteUser } = require('../models/signup');
-
-dotenv.config();
+// routes/signup.js
+import express from 'express';
+import { createUser, editUser, deleteOneUser } from '../models/signup.js';
 
 const router = express.Router();
 
 // Route to create a new user
 router.post("/", async (req, res) => {
     try {
-        const { email, password } = req.body;
-        const newUser = await createUser(email, password);
-        res.status(201).json({ user: newUser, status: true, message: "User created successfully" });
+        const newUser = req.body;
+        const createdUser = await createUser(newUser);
+        res.status(201).json(createdUser);
     } catch (error) {
         console.error(error.stack);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
 });
 
-// Edit Route to update an existing user by ID
-router.put("/:id", async (req, res) => {
+// Route to edit user details
+router.patch("/:id", async (req, res) => {
     try {
         const id = req.params.id;
-        const { email, password } = req.body;
-        await editUser(id, email, password);
-        res.status(200).json({ message: 'User updated successfully' });
+        const updatedUser = req.body;
+        const result = await editUser(id, updatedUser);
+
+        if (result.success) {
+            res.status(200).json(result);
+        } else {
+            res.status(404).json(result); // User not found
+        }
     } catch (error) {
         console.error(error.stack);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
 });
 
@@ -35,13 +38,17 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
     try {
         const id = req.params.id;
-        await deleteUser(id);
-        res.status(204).json({ message: 'User deleted successfully' });
+        const result = await deleteOneUser(id);
+
+        if (result.success) {
+            res.status(200).json(result);
+        } else {
+            res.status(404).json(result); // User not found
+        }
     } catch (error) {
         console.error(error.stack);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
 });
 
-module.exports = router;
-
+export default router;
